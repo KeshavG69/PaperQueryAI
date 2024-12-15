@@ -1,0 +1,46 @@
+# PaperQueryAI
+
+PaperQueryAI is a web application that allows users to query an AI model to get answers solely based on research papers. The application integrates a language model (LLM) to provide responses derived strictly from academic and peer-reviewed sources.
+
+## Features
+
+- Query an AI model using research papers.
+- Get accurate answers based on academic sources.
+- Focus on research-based data without irrelevant information.
+
+## Installation
+
+To run the project locally, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/KeshavG69/PaperQueryAI.git
+   ```
+
+2. Navigate into the project directory:
+   ```bash
+   cd PaperQueryAI
+   ```
+
+3. Install the required dependencies (if you have a `requirements.txt` file):
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Usage
+
+1. To run the application, use the following command:
+   ```bash
+   python main.py
+   ```
+
+
+
+
+## Contact
+
+Your Name - [@KeshavG69](https://github.com/KeshavG69)
+
+Project Link: [https://github.com/KeshavG69/PaperQueryAI](https://github.com/KeshavG69/PaperQueryAI)
+
+
