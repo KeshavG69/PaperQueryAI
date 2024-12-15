@@ -30,13 +30,13 @@ To run the project locally, follow these steps:
 
 4. **Set up your API key**:
    - Obtain your API key from the service provider (e.g., OpenAI, Hugging Face, etc.).
-   - Create a `.env` file in the project directory.
-   - Add your API key to the `.env` file like so:
+   - Create a `.streamlit/streamlit.toml` file in the project directory (if it doesn't already exist).
+   
      ```
      SERPAPI_KEY=your-api-key-here
      GOOGLE_API_KEY=your-api-key-here
      ```
-   - The application will read this key from the `.env` file using the `python-dotenv` library (if you're using this library).
+   
 
 ## Running the Application
 
@@ -52,3 +52,8 @@ To run the project locally, follow these steps:
 Your Name - [@KeshavG69](https://github.com/KeshavG69)
 
 Project Link: [https://github.com/KeshavG69/PaperQueryAI](https://github.com/KeshavG69/PaperQueryAI)
+
+
+
+
+
