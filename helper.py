@@ -1,6 +1,7 @@
 import requests
 from langchain_core.output_parsers import StrOutputParser
 import os
+import hashlib
 from dotenv import load_dotenv
 import urllib
 from langchain_core.prompts import ChatPromptTemplate
@@ -16,6 +17,32 @@ from serpapi import GoogleSearch
 load_dotenv() 
 
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",temperature=0.1,api_key=os.getenv('GOOGLE_API_KEY'))
+
+
+query_cache = {}
+pdf_cache_file = "pdf_files/cache.txt"
+
+def hash_link(link):
+    """Generate a unique hash for a given link."""
+    return hashlib.md5(link.encode('utf-8')).hexdigest()
+
+def load_pdf_cache():
+  
+  """Load cached PDF links and their hashed filenames."""
+  cache = {}
+  if os.path.exists(pdf_cache_file):
+      with open(pdf_cache_file, 'r') as f:
+          for line in f:
+              hash_val, filename = line.strip().split(',', 1)
+              cache[hash_val] = filename
+  return cache
+
+def save_pdf_cache(cache):
+  """Save updated cache to a file."""
+
+  with open(pdf_cache_file, 'w') as f:
+      for hash_val, filename in cache.items():
+          f.write(f"{hash_val},{filename}\n")
 
 def get_research_papers(query,num:int=15):
   
@@ -62,14 +89,23 @@ def categorise_links(links):
   return jina_links,pdf_links
 
 
-def download_pdf_files(pdf_links,directory='pdf_files'):
+def download_pdf_files(pdf_links, directory='pdf_files'):
+  """Download PDF files if not already cached."""
   if not os.path.exists(directory):
-    os.makedirs(directory)
+      os.makedirs(directory)
+
+  cache = load_pdf_cache()
   for link in pdf_links:
-    
-    filename = f"{uuid.uuid4()}.pdf"
-    filepath = os.path.join(directory, filename)
-    urllib.request.urlretrieve(link, filepath)
+      hash_val = hash_link(link)
+      if hash_val not in cache:
+          filename = f"{uuid.uuid4()}.pdf"
+          filepath = os.path.join(directory, filename)
+          try:
+              urllib.request.urlretrieve(link, filepath)
+              cache[hash_val] = filename
+          except Exception as e:
+              print(f"Failed to download {link}: {e}")
+  save_pdf_cache(cache)
 
 
 
