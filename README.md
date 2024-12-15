@@ -23,7 +23,7 @@ To run the project locally, follow these steps:
    cd PaperQueryAI
    ```
 
-3. Install the required dependencies (if you have a `requirements.txt` file):
+3. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -38,20 +38,17 @@ To run the project locally, follow these steps:
      ```
    - The application will read this key from the `.env` file using the `python-dotenv` library (if you're using this library).
 
-## Usage
+## Running the Application
 
-1. To run the application, use the following command:
+1. To run the application using Streamlit, use the following command:
    ```bash
-   python main.py
+   streamlit run app.py
    ```
 
+2. The app should open in your default browser. You can now interact with the AI model and query based on research papers.
 
 ## Contact
 
 Your Name - [@KeshavG69](https://github.com/KeshavG69)
 
 Project Link: [https://github.com/KeshavG69/PaperQueryAI](https://github.com/KeshavG69/PaperQueryAI)
-
-
-
- 
