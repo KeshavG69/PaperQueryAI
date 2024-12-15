@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import urllib
 from langchain_core.prompts import ChatPromptTemplate
 import uuid
+import streamlit as st
 import shutil
 from langchain_core.documents import Document
 from langchain_community.document_loaders import DirectoryLoader
@@ -16,7 +17,7 @@ from serpapi import GoogleSearch
 
 load_dotenv() 
 
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",temperature=0.1,api_key=os.getenv('GOOGLE_API_KEY'))
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",temperature=0.1,api_key=st.secrets['GOOGLE_API_KEY'])
 
 
 query_cache = {}
@@ -49,7 +50,7 @@ def get_research_papers(query,num:int=15):
   params = {
   "engine": "google_scholar",
   "q": query,
-  "api_key": os.getenv('SERPAPI_KEY'),
+  "api_key": st.secrets['SERPAPI_KEY'],
   "num":num
   }
 
