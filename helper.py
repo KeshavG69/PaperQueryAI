@@ -17,98 +17,93 @@ from templates import template
 from serpapi import GoogleSearch
 
 
-load_dotenv() 
+load_dotenv()
 
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",temperature=0.1,api_key=st.secrets['GOOGLE_API_KEY'])
-
-
-
-def get_research_papers(query,num:int=15):
-  
-  params = {
-  "engine": "google_scholar",
-  "q": query,
-  "api_key": st.secrets['SERPAPI_KEY'],
-  "num":num
-  }
-
-  search = GoogleSearch(params)
-  results = search.get_dict()
-  organic_results = results["organic_results"]
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash", temperature=0.1, api_key=st.secrets["GOOGLE_API_KEY"]
+)
 
 
-  links=[]
-  ref={}
+def get_research_papers(query, num: int = 15):
 
-  for result in organic_results:
-    try:
-      links.append(result['link'])
-      
-      ref[result['title']]=result['link']
-      
-      
-    except:
-      pass
-  return links,ref
+    params = {
+        "engine": "google_scholar",
+        "q": query,
+        "api_key": st.secrets["SERPAPI_KEY"],
+        "num": num,
+    }
 
+    search = GoogleSearch(params)
+    results = search.get_dict()
+    organic_results = results["organic_results"]
+
+    links = []
+    ref = {}
+
+    for result in organic_results:
+        try:
+            links.append(result["link"])
+
+            ref[result["title"]] = result["link"]
+
+        except:
+            pass
+    return links, ref
 
 
 def categorise_links(links):
 
-  jina_links=[]
-  pdf_links=[]
-  for link in links:
-    if 'https://books.google.com/' not in link:
-      response = requests.head(link, allow_redirects=True)
-      content_type = response.headers.get('Content-Type', '').lower()
-      if 'application/pdf' in content_type :
-        pdf_links.append(link)
-      else:
-        jina_links.append('https://r.jina.ai/'+link)
-  return jina_links,pdf_links
-
-
-
-
+    jina_links = []
+    pdf_links = []
+    for link in links:
+        if "https://books.google.com/" not in link:
+            response = requests.head(link, allow_redirects=True)
+            content_type = response.headers.get("Content-Type", "").lower()
+            if "application/pdf" in content_type:
+                pdf_links.append(link)
+            else:
+                jina_links.append("https://r.jina.ai/" + link)
+    return jina_links, pdf_links
 
 
 def jina_text_read(jina_links):
-  jina_text=[]
-  for link in jina_links:
-    response = requests.get(link)
-    text = response.text
-    document=Document(page_content=text,metadata={'source':link})
-    jina_text.append(document)
-  return jina_text
+    jina_text = []
+    for link in jina_links:
+        response = requests.get(link)
+        text = response.text
+        document = Document(page_content=text, metadata={"source": link})
+        jina_text.append(document)
+    return jina_text
+
 
 def pdf_text_read(pdf_links):
-  pdf_text=[]
-  for link in pdf_links:
-    response=requests.get(link)
-    if response.status_code == 200:
-       pdf_file = BytesIO(response.content)
-       text = ""
-    with pdfplumber.open(pdf_file) as pdf:
-        for page in pdf.pages:
-            text += page.extract_text()
-    pdf_text.append(Document(page_content=text,metadata={'source':link}))
+    pdf_text = []
+    for link in pdf_links:
+        response = requests.get(link)
+        if response.status_code == 200:
+            pdf_file = BytesIO(response.content)
+            text = ""
+        with pdfplumber.open(pdf_file) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text()
+        pdf_text.append(Document(page_content=text, metadata={"source": link}))
     return pdf_text
 
 
-def chain(query,jina_text,pdf_text):
-  prompt = ChatPromptTemplate.from_template(template)
-  answer_chain=prompt|llm|StrOutputParser()
-  answer=answer_chain.invoke({'user_query':query,'jina_text':jina_text,'pdf_text':pdf_text})
-  return answer
+def chain(query, jina_text, pdf_text):
+    prompt = ChatPromptTemplate.from_template(template)
+    answer_chain = prompt | llm | StrOutputParser()
+    answer = answer_chain.invoke(
+        {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
+    )
+    return answer
+
 
 def ask(query):
-  links,ref=get_research_papers(query)
-  jina_links,pdf_links=categorise_links(links)
+    links, ref = get_research_papers(query)
+    jina_links, pdf_links = categorise_links(links)
 
-  jina_text=jina_text_read(jina_links)
-  pdf_text=pdf_text_read(pdf_links)
-  answer=chain(query,jina_text,pdf_text)
-  return answer
-
-
-
+    jina_text = jina_text_read(jina_links)
+    pdf_text = pdf_text_read(pdf_links)
+    answer = chain(query, jina_text, pdf_text)
+    return answer
