@@ -119,4 +119,4 @@ def ask_without_streaming(query):
     prompt = ChatPromptTemplate.from_template(template)
     answer_chain = prompt | llm | StrOutputParser()
     answer=answer_chain.invoke({"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text})
-        return answer
+    return answer
