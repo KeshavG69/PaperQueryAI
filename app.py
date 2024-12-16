@@ -22,11 +22,10 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
 
     # Generate assistant response using the `ask` function
     with st.chat_message("assistant"):
-        status_placeholder = st.empty()
-        status_placeholder.markdown("_Processing your query..._")
+        with st.spinner("Processing your query..."):
 
         
-        response=st.write_stream(ask(prompt))
+            response=st.write_stream(ask(prompt))
 
         
         print(response)
