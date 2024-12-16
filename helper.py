@@ -20,8 +20,9 @@ load_dotenv()
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",temperature=0.1,api_key=st.secrets['GOOGLE_API_KEY'])
 
 
+directory='/tmp/pdf_files'
 query_cache = {}
-pdf_cache_file = "pdf_files/cache.txt"
+pdf_cache_file = "/tmp/pdf_files/cache.txt"
 
 def hash_link(link):
     """Generate a unique hash for a given link."""
@@ -90,7 +91,7 @@ def categorise_links(links):
   return jina_links,pdf_links
 
 
-def download_pdf_files(pdf_links, directory='pdf_files'):
+def download_pdf_files(pdf_links, directory=directory):
   """Download PDF files if not already cached."""
   if not os.path.exists(directory):
       os.makedirs(directory)
@@ -119,7 +120,7 @@ def jina_text_read(jina_links):
     jina_text.append(document)
   return jina_text
 
-def pdf_text_read(directory='pdf_files'):
+def pdf_text_read(directory=directory):
   loader = DirectoryLoader(directory, glob="**/*.pdf")
   pdf_text = loader.load()
   return pdf_text
@@ -134,9 +135,9 @@ def chain(query,jina_text,pdf_text):
 def ask(query):
   links,ref=get_research_papers(query)
   jina_links,pdf_links=categorise_links(links)
-  download_pdf_files(pdf_links,'pdf_files')
+  download_pdf_files(pdf_links,directory)
   jina_text=jina_text_read(jina_links)
-  pdf_text=pdf_text_read('pdf_files')
+  pdf_text=pdf_text_read(directory)
   answer=chain(query,jina_text,pdf_text)
   return answer
 
