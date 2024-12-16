@@ -1,59 +1,73 @@
 
-# PaperQueryAI
 
-PaperQueryAI is a web application that allows users to query an AI model to get answers solely based on research papers. The application integrates a language model (LLM) to provide responses derived strictly from academic and peer-reviewed sources.
+# PaperQueryAI  
 
-## Features
+Access the web app: [https://paperqueryai.streamlit.app](https://paperqueryai.streamlit.app)  
 
-- Query an AI model using research papers.
-- Get accurate answers based on academic sources.
-- Focus on research-based data without irrelevant information.
+PaperQueryAI is an AI-powered application that allows users to ask questions and receive answers backed by credible research papers. This tool is designed to provide trustworthy and reliable information, making it perfect for students, researchers, and professionals who value evidence-based answers.  
 
-## Installation
+---
 
-To run the project locally, follow these steps:
+## Features  
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/KeshavG69/PaperQueryAI.git
-   ```
+- **Research-Backed Answers**: Get responses that are always rooted in peer-reviewed research papers.  
+- **User-Friendly Interface**: Ask questions in natural language and receive concise, well-supported answers.  
+- **Accessible Anytime**: Easily access PaperQueryAI through a streamlined web interface.  
 
-2. Navigate into the project directory:
-   ```bash
-   cd PaperQueryAI
-   ```
+---
 
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## How It Works  
 
-4. **Set up your API key**:
-   - Obtain your API key from the service provider (e.g., OpenAI, Hugging Face, etc.).
-   - Create a `.streamlit/secrets.toml` file in the project directory (if it doesn't already exist).
-   
-     ```
-     SERPAPI_KEY=your-api-key-here
-     GOOGLE_API_KEY=your-api-key-here
-     ```
-   
+1. Visit [https://paperqueryai.streamlit.app](https://paperqueryai.streamlit.app).  
+2. Type your question in the input box.  
+3. Receive an answer, complete with references to the relevant research papers.  
 
-## Running the Application
+---
 
-1. To run the application using Streamlit, use the following command:
-   ```bash
-   streamlit run app.py
-   ```
+## Technology Stack  
 
-2. The app should open in your default browser. You can now interact with the AI model and query based on research papers.
+- **Frontend**: Streamlit for an interactive and responsive user interface.  
+- **Backend**: Advanced Natural Language Processing (NLP) to fetch and summarize research papers.  
+- **Data Source**: Peer-reviewed research papers and credible scientific databases.  
 
-## Contact
+---
 
-Your Name - [@KeshavG69](https://github.com/KeshavG69)
+## Getting Started  
 
-Project Link: [https://github.com/KeshavG69/PaperQueryAI](https://github.com/KeshavG69/PaperQueryAI)
+To run the app locally, follow these steps:  
 
+1. Clone the repository:  
+   ```bash  
+   git clone https://github.com/KeshavG69/PaperQueryAI.git  
+   cd PaperQueryAI  
+   ```  
+2. Install the required dependencies:  
+   ```bash  
+   pip install -r requirements.txt  
+   ```  
+3. Run the Streamlit app:  
+   ```bash  
+   streamlit run app.py  
+   ```  
+4. Open the app in your browser at `http://localhost:8501`.  
 
+---
 
+## Contact  
 
+For any queries or suggestions, feel free to reach out:  
 
+- **Email**: [gargkeshav504@gmail.com](mailto:gargkeshav504@gmail.com)  
+- **LinkedIn**: [Keshav Garg](https://www.linkedin.com/in/keshav-garg-7760b1232/)  
+
+---
+
+## Contributing  
+
+Contributions are welcome! If you'd like to improve the app, please fork the repository and create a pull request.  
+
+---
+
+## License  
+
+This project is licensed under the [MIT License](LICENSE).  
