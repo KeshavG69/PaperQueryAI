@@ -1,4 +1,4 @@
-from helper import ask
+from helper import  ask_without_streaming
 
 
 
@@ -11,5 +11,5 @@ while True:
 
     break
 
-  answer=ask(query)
+  answer=ask_without_streaming(query)
   print(answer)
