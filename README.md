@@ -30,7 +30,7 @@ To run the project locally, follow these steps:
 
 4. **Set up your API key**:
    - Obtain your API key from the service provider (e.g., OpenAI, Hugging Face, etc.).
-   - Create a `.streamlit/streamlit.toml` file in the project directory (if it doesn't already exist).
+   - Create a `.streamlit/secrets.toml` file in the project directory (if it doesn't already exist).
    
      ```
      SERPAPI_KEY=your-api-key-here
