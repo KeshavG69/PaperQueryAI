@@ -11,7 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate
 import streamlit as st
 
 from langchain_core.documents import Document
-from langchain_community.document_loaders import DirectoryLoader
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from templates import template
 from serpapi import GoogleSearch
@@ -20,7 +20,7 @@ from serpapi import GoogleSearch
 load_dotenv()
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", temperature=0.1, api_key=st.secrets["GOOGLE_API_KEY"]
+    model="gemini-1.5-flash", temperature=0.1, api_key=st.secrets["GOOGLE_API_KEY"],stream=True
 )
 
 
@@ -90,13 +90,13 @@ def pdf_text_read(pdf_links):
     return pdf_text
 
 
-def chain(query, jina_text, pdf_text):
-    prompt = ChatPromptTemplate.from_template(template)
-    answer_chain = prompt | llm | StrOutputParser()
-    answer = answer_chain.invoke(
-        {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
-    )
-    return answer
+# def chain(query, jina_text, pdf_text):
+
+    
+#     answer = answer_chain.invoke(
+#         {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
+#     )
+#     return answer
 
 
 def ask(query):
@@ -105,5 +105,7 @@ def ask(query):
 
     jina_text = jina_text_read(jina_links)
     pdf_text = pdf_text_read(pdf_links)
-    answer = chain(query, jina_text, pdf_text)
-    return answer
+    prompt = ChatPromptTemplate.from_template(template)
+    answer_chain = prompt | llm | StrOutputParser()
+    for chunk in answer_chain.stream({"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}):
+        yield chunk

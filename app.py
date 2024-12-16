@@ -25,14 +25,13 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
         status_placeholder = st.empty()
         status_placeholder.markdown("_Processing your query..._")
 
-        try:
-            response = ask(prompt)
-        except Exception as e:
-            response = f"An error occurred: {e}"
+        
+        response=st.write_stream(ask(prompt))
 
-        # Clear the status message and display the response
-        status_placeholder.empty()
-        st.markdown(response)
+        
+        print(response)
+
+
 
     # Save assistant's message in chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
