@@ -1,41 +1,53 @@
 import streamlit as st
-from helper import ask
+from helper import ask, llm_call
+
+st.set_page_config(page_title="PaperQueryAI", page_icon="🤖", layout="wide")
 
 
-st.set_page_config(page_title="PaperQueryAI", page_icon="🤖",layout="wide")
-# Streamlit title
-st.title("PaperQueryAI:Chatbot Based On Research Papers")
+st.title("PaperQueryAI: Chatbot Based On Research Papers")
 
-# Initialize session state for chat history
+
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-# Display chat history
+
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+        
+     
+        if message["role"] == "assistant" and "references" in message:
+            st.markdown("**References:**")
+            for paper_name, paper_link in message["references"].items():
+                st.markdown(f"- [{paper_name}]({paper_link})")
 
-# Chat input for new queries
+
 if prompt := st.chat_input("Ask your question based on research papers:"):
-    # Add user's message to the chat
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate assistant response using the `ask` function
+
     with st.chat_message("assistant"):
         with st.spinner("Processing your query..."):
-            response=st.write_stream(ask(prompt))
-            
-            
+            ref,jina_text, pdf_text = ask(prompt)
 
-        
+            response = llm_call(prompt, jina_text, pdf_text)
             
 
-        
-        
+
+            st.write_stream(response)
 
 
+            if ref:
+                st.markdown("**References:**")
+                for paper_name, paper_link in ref.items():
+                    st.markdown(f"- [{paper_name}]({paper_link})")
 
-    # Save assistant's message in chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+
+    st.session_state.messages.append({
+        "role": "assistant", 
+        "content": response, 
+        "references": ref
+    })
