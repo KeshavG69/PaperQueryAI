@@ -49,7 +49,7 @@ def get_research_papers(query, num: int = 15):
 
         except:
             pass
-    print(ref)
+
     return links, ref
 
 
@@ -83,7 +83,7 @@ def categorise_links(links):
                 pdf_links.append(link)
             elif result_type == "jina":
                 jina_links.append("https://r.jina.ai/" + link)
-    print(jina_links, pdf_links)
+   
     return jina_links, pdf_links
 
 
@@ -97,7 +97,7 @@ def fetch_link_content(link):
         text = response.text
         return Document(page_content=text, metadata={"source": link})
     except requests.RequestException as e:
-        print(f"Failed to fetch {link}: {e}")
+
         return None  # Return None if the request fails
 
 def jina_text_read(jina_links):
@@ -112,7 +112,7 @@ def jina_text_read(jina_links):
             if document is not None:  # Add only successfully fetched documents
                 jina_text.append(document)
 
-    print(jina_text)
+
     return jina_text
 
 # def jina_text_read(jina_links):
@@ -132,7 +132,7 @@ def fetch_pdf_text(link):
     try:
         response = requests.get(link, timeout=10)  # Fetch PDF with a timeout
         if response.status_code != 200:
-            print(f"Failed to fetch PDF from {link}: Status Code {response.status_code}")
+
             return None
 
         pdf_file = BytesIO(response.content)
@@ -145,7 +145,7 @@ def fetch_pdf_text(link):
 
         return Document(page_content=text, metadata={"source": link})
     except Exception as e:
-        print(f"Error processing {link}: {e}")
+
         return None  # Gracefully skip any problematic links
 
 def pdf_text_read(pdf_links):
@@ -160,7 +160,7 @@ def pdf_text_read(pdf_links):
             if document is not None:  # Only add successful results
                 pdf_text.append(document)
 
-    print(f"Extracted text from {len(pdf_text)} PDFs.")
+
     return pdf_text
 
 # def pdf_text_read(pdf_links):
