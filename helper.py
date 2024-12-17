@@ -24,7 +24,7 @@ llm = ChatGoogleGenerativeAI(
 )
 
 
-def get_research_papers(query, num: int = 15):
+def get_research_papers(query, num: int = 5):
 
     params = {
         "engine": "google_scholar",
