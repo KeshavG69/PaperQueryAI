@@ -1,6 +1,7 @@
 import requests
 from langchain_core.output_parsers import StrOutputParser
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 import pdfplumber
 
@@ -24,7 +25,7 @@ llm = ChatGoogleGenerativeAI(
 )
 
 
-def get_research_papers(query, num: int = 5):
+def get_research_papers(query, num: int = 15):
 
     params = {
         "engine": "google_scholar",
@@ -48,46 +49,125 @@ def get_research_papers(query, num: int = 5):
 
         except:
             pass
+    print(ref)
     return links, ref
 
 
-def categorise_links(links):
+def check_link(link):
+    """Check if the link points to a PDF or categorize as Jina link."""
+    try:
+        # Skip links containing "books.google.com"
+        if "https://books.google.com/" in link:
+            pass
+        
+        response = requests.head(link, timeout=5, allow_redirects=True)
+        content_type = response.headers.get("Content-Type", "").lower()
+        if "application/pdf" in content_type:
+            return "pdf", link
+    except requests.RequestException:
+        pass  # Ignore errors and treat as a Jina link
+    
+    return "jina", link
 
+def categorise_links(links):
+    """Categorize links into PDF links and Jina links using parallel requests."""
     jina_links = []
     pdf_links = []
-    for link in links:
-        if "https://books.google.com/" not in link:
-            response = requests.head(link, allow_redirects=True)
-            content_type = response.headers.get("Content-Type", "").lower()
-            if "application/pdf" in content_type:
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:  # 10 threads for parallel execution
+        futures = {executor.submit(check_link, link): link for link in links}
+        
+        for future in as_completed(futures):
+            result_type, link = future.result()
+            if result_type == "pdf":
                 pdf_links.append(link)
-            else:
+            elif result_type == "jina":
                 jina_links.append("https://r.jina.ai/" + link)
+    print(jina_links, pdf_links)
     return jina_links, pdf_links
 
 
-def jina_text_read(jina_links):
-    jina_text = []
-    for link in jina_links:
-        response = requests.get(link)
+
+
+def fetch_link_content(link):
+    """Fetch the content of a link and return a Document."""
+    try:
+        response = requests.get(link, timeout=5)  # Set a timeout to avoid long waits
+        response.raise_for_status()  # Raise an error for bad status codes
         text = response.text
-        document = Document(page_content=text, metadata={"source": link})
-        jina_text.append(document)
+        return Document(page_content=text, metadata={"source": link})
+    except requests.RequestException as e:
+        print(f"Failed to fetch {link}: {e}")
+        return None  # Return None if the request fails
+
+def jina_text_read(jina_links):
+    """Fetch text content from multiple links in parallel and return as Documents."""
+    jina_text = []
+
+    with ThreadPoolExecutor(max_workers=10) as executor:  # Adjust max_workers as needed
+        futures = {executor.submit(fetch_link_content, link): link for link in jina_links}
+
+        for future in as_completed(futures):
+            document = future.result()
+            if document is not None:  # Add only successfully fetched documents
+                jina_text.append(document)
+
+    print(jina_text)
     return jina_text
 
 
-def pdf_text_read(pdf_links):
-    pdf_text = []
-    for link in pdf_links:
-        response = requests.get(link)
-        if response.status_code == 200:
-            pdf_file = BytesIO(response.content)
-            text = ""
+
+
+
+def fetch_pdf_text(link):
+    """Fetch a PDF from a URL, extract its text, and wrap it in a Document."""
+    try:
+        response = requests.get(link, timeout=10)  # Fetch PDF with a timeout
+        if response.status_code != 200:
+            print(f"Failed to fetch PDF from {link}: Status Code {response.status_code}")
+            return None
+
+        pdf_file = BytesIO(response.content)
+        text = ""
         with pdfplumber.open(pdf_file) as pdf:
             for page in pdf.pages:
-                text += page.extract_text()
-        pdf_text.append(Document(page_content=text, metadata={"source": link}))
+                extracted_text = page.extract_text()
+                if extracted_text:  # Avoid None results
+                    text += extracted_text
+
+        return Document(page_content=text, metadata={"source": link})
+    except Exception as e:
+        print(f"Error processing {link}: {e}")
+        return None  # Gracefully skip any problematic links
+
+def pdf_text_read(pdf_links):
+    """Fetch and extract text from multiple PDFs concurrently."""
+    pdf_text = []
+
+    with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust max_workers for concurrency
+        futures = {executor.submit(fetch_pdf_text, link): link for link in pdf_links}
+
+        for future in as_completed(futures):
+            document = future.result()
+            if document is not None:  # Only add successful results
+                pdf_text.append(document)
+
+    print(f"Extracted text from {len(pdf_text)} PDFs.")
     return pdf_text
+
+# def pdf_text_read(pdf_links):
+#     pdf_text = []
+#     for link in pdf_links:
+#         response = requests.get(link)
+#         if response.status_code == 200:
+#             pdf_file = BytesIO(response.content)
+#             text = ""
+#             with pdfplumber.open(pdf_file) as pdf:
+#                 for page in pdf.pages:
+#                     text += page.extract_text()
+#             pdf_text.append(Document(page_content=text, metadata={"source": link}))
+#     print(pdf_text)
+#     return pdf_text
 
 
 # def chain(query, jina_text, pdf_text):
