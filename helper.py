@@ -203,13 +203,17 @@ def ask(query):
 
     jina_text = jina_text_read(jina_links)
     pdf_text = pdf_text_read(pdf_links)
+
+        
+    return ref,jina_text, pdf_text
+
+def llm_call(query, jina_text, pdf_text):
     prompt = ChatPromptTemplate.from_template(template)
     answer_chain = prompt | llm | StrOutputParser()
     for chunk in answer_chain.stream(
         {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
     ):
         yield chunk
-
 
 def ask_without_streaming(query):
     links, ref = get_research_papers(query)
