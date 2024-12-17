@@ -1,6 +1,8 @@
 import streamlit as st
 from helper import ask
 
+
+st.set_page_config(page_title="PaperQueryAI", page_icon="🤖",layout="wide")
 # Streamlit title
 st.title("Chatbot Based On Research Papers")
 
@@ -23,12 +25,15 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
     # Generate assistant response using the `ask` function
     with st.chat_message("assistant"):
         with st.spinner("Processing your query..."):
-
-        
             response=st.write_stream(ask(prompt))
+            
+            
 
         
-        print(response)
+            
+
+        
+        
 
 
 
