@@ -4,7 +4,7 @@ from helper import ask
 
 st.set_page_config(page_title="PaperQueryAI", page_icon="🤖",layout="wide")
 # Streamlit title
-st.title("Chatbot Based On Research Papers")
+st.title("PaperQueryAI:Chatbot Based On Research Papers")
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
