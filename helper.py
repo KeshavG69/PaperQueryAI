@@ -115,7 +115,15 @@ def jina_text_read(jina_links):
     print(jina_text)
     return jina_text
 
-
+# def jina_text_read(jina_links):
+#     jina_text = []
+#     for link in jina_links:
+#         response = requests.get(link)
+#         text = response.text
+#         document = Document(page_content=text, metadata={"source": link})
+#         jina_text.append(document)
+#     print(jina_text)
+#     return jina_text
 
 
 
