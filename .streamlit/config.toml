@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#D3D3D3"           # Light grey for buttons and accents
+backgroundColor = "#2E2E2E"        # Dark grey for the main background
+secondaryBackgroundColor = "#3C3C3C"  # Slightly lighter grey for containers
+textColor = "#FFFFFF"              # White for text (high contrast)
+font = "sans serif"                # Clean, modern font
