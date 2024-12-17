@@ -33,11 +33,11 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
         with st.spinner("Processing your query..."):
             ref,jina_text, pdf_text = ask(prompt)
 
-            response = llm_call(prompt, jina_text, pdf_text)
+            
             
 
 
-            st.write_stream(response)
+            response=st.write_stream(llm_call(prompt, jina_text, pdf_text))
 
 
             if ref:
