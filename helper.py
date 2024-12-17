@@ -21,7 +21,10 @@ from serpapi import GoogleSearch
 load_dotenv()
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", temperature=0.1, api_key=st.secrets["GOOGLE_API_KEY"],stream=True
+    model="gemini-1.5-flash",
+    temperature=0.1,
+    api_key=st.secrets["GOOGLE_API_KEY"],
+    stream=True,
 )
 
 
@@ -56,64 +59,68 @@ def get_research_papers(query, num: int = 15):
 def check_link(link):
     """Check if the link points to a PDF or categorize as Jina link."""
     try:
-        # Skip links containing "books.google.com"
+       
         if "https://books.google.com/" in link:
             pass
-        
+
         response = requests.head(link, timeout=5, allow_redirects=True)
         content_type = response.headers.get("Content-Type", "").lower()
         if "application/pdf" in content_type:
             return "pdf", link
     except requests.RequestException:
-        pass  # Ignore errors and treat as a Jina link
-    
+        pass  
+
     return "jina", link
+
 
 def categorise_links(links):
     """Categorize links into PDF links and Jina links using parallel requests."""
     jina_links = []
     pdf_links = []
-    
-    with ThreadPoolExecutor(max_workers=10) as executor:  # 10 threads for parallel execution
+
+    with ThreadPoolExecutor(
+        max_workers=10
+    ) as executor:  # 10 threads for parallel execution
         futures = {executor.submit(check_link, link): link for link in links}
-        
+
         for future in as_completed(futures):
             result_type, link = future.result()
             if result_type == "pdf":
                 pdf_links.append(link)
             elif result_type == "jina":
                 jina_links.append("https://r.jina.ai/" + link)
-   
+
     return jina_links, pdf_links
-
-
 
 
 def fetch_link_content(link):
     """Fetch the content of a link and return a Document."""
     try:
-        response = requests.get(link, timeout=5)  # Set a timeout to avoid long waits
-        response.raise_for_status()  # Raise an error for bad status codes
+        response = requests.get(link, timeout=5)  
+        response.raise_for_status()  
         text = response.text
         return Document(page_content=text, metadata={"source": link})
     except requests.RequestException as e:
+        pass
+        return None  
 
-        return None  # Return None if the request fails
 
 def jina_text_read(jina_links):
     """Fetch text content from multiple links in parallel and return as Documents."""
     jina_text = []
 
     with ThreadPoolExecutor(max_workers=10) as executor:  # Adjust max_workers as needed
-        futures = {executor.submit(fetch_link_content, link): link for link in jina_links}
+        futures = {
+            executor.submit(fetch_link_content, link): link for link in jina_links
+        }
 
         for future in as_completed(futures):
             document = future.result()
             if document is not None:  # Add only successfully fetched documents
                 jina_text.append(document)
 
-
     return jina_text
+
 
 # def jina_text_read(jina_links):
 #     jina_text = []
@@ -124,7 +131,6 @@ def jina_text_read(jina_links):
 #         jina_text.append(document)
 #     print(jina_text)
 #     return jina_text
-
 
 
 def fetch_pdf_text(link):
@@ -145,14 +151,18 @@ def fetch_pdf_text(link):
 
         return Document(page_content=text, metadata={"source": link})
     except Exception as e:
+        pass
 
         return None  # Gracefully skip any problematic links
+
 
 def pdf_text_read(pdf_links):
     """Fetch and extract text from multiple PDFs concurrently."""
     pdf_text = []
 
-    with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust max_workers for concurrency
+    with ThreadPoolExecutor(
+        max_workers=5
+    ) as executor:  # Adjust max_workers for concurrency
         futures = {executor.submit(fetch_pdf_text, link): link for link in pdf_links}
 
         for future in as_completed(futures):
@@ -160,8 +170,8 @@ def pdf_text_read(pdf_links):
             if document is not None:  # Only add successful results
                 pdf_text.append(document)
 
-
     return pdf_text
+
 
 # def pdf_text_read(pdf_links):
 #     pdf_text = []
@@ -180,7 +190,7 @@ def pdf_text_read(pdf_links):
 
 # def chain(query, jina_text, pdf_text):
 
-    
+
 #     answer = answer_chain.invoke(
 #         {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
 #     )
@@ -195,8 +205,11 @@ def ask(query):
     pdf_text = pdf_text_read(pdf_links)
     prompt = ChatPromptTemplate.from_template(template)
     answer_chain = prompt | llm | StrOutputParser()
-    for chunk in answer_chain.stream({"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}):
+    for chunk in answer_chain.stream(
+        {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
+    ):
         yield chunk
+
 
 def ask_without_streaming(query):
     links, ref = get_research_papers(query)
@@ -206,5 +219,7 @@ def ask_without_streaming(query):
     pdf_text = pdf_text_read(pdf_links)
     prompt = ChatPromptTemplate.from_template(template)
     answer_chain = prompt | llm | StrOutputParser()
-    answer=answer_chain.invoke({"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text})
+    answer = answer_chain.invoke(
+        {"user_query": query, "jina_text": jina_text, "pdf_text": pdf_text}
+    )
     return answer
