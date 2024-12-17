@@ -63,7 +63,7 @@ def check_link(link):
         if "https://books.google.com/" in link:
             pass
 
-        response = requests.head(link, timeout=5, allow_redirects=True)
+        response = requests.head(link, timeout=10, allow_redirects=True)
         content_type = response.headers.get("Content-Type", "").lower()
         if "application/pdf" in content_type:
             return "pdf", link
