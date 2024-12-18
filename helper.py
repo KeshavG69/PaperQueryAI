@@ -20,6 +20,8 @@ from serpapi import GoogleSearch
 
 load_dotenv()
 
+MAX_WORKERS=10
+
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
     temperature=0.1,
@@ -52,7 +54,7 @@ def get_research_papers(query, num: int = 20):
 
         except:
             pass
-
+    print(ref)
     return links, ref
 
 
@@ -89,7 +91,7 @@ def categorise_links(links):
                 pdf_links.append(link)
             elif result_type == "jina":
                 jina_links.append("https://r.jina.ai/" + link)
-
+    print(jina_links, pdf_links)
     return jina_links, pdf_links
 
 
@@ -118,7 +120,7 @@ def jina_text_read(jina_links):
             document = future.result()
             if document is not None:  # Add only successfully fetched documents
                 jina_text.append(document)
-
+    print(jina_text)
     return jina_text
 
 
@@ -131,6 +133,9 @@ def jina_text_read(jina_links):
 #         jina_text.append(document)
 #     print(jina_text)
 #     return jina_text
+
+
+
 
 
 def fetch_pdf_text(link):
@@ -161,7 +166,7 @@ def pdf_text_read(pdf_links):
     pdf_text = []
 
     with ThreadPoolExecutor(
-        max_workers=5
+        max_workers=10
     ) as executor:  # Adjust max_workers for concurrency
         futures = {executor.submit(fetch_pdf_text, link): link for link in pdf_links}
 
@@ -170,6 +175,7 @@ def pdf_text_read(pdf_links):
             if document is not None:  # Only add successful results
                 pdf_text.append(document)
 
+    print(pdf_text)
     return pdf_text
 
 
