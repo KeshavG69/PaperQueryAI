@@ -4,7 +4,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 import pdfplumber
-
+from icecream import ic 
 from dotenv import load_dotenv
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,8 +19,7 @@ from serpapi import GoogleSearch
 
 
 load_dotenv()
-
-MAX_WORKERS=10
+ic.disable()
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
@@ -54,7 +53,7 @@ def get_research_papers(query, num: int = 20):
 
         except:
             pass
-    print(ref)
+    ic(ref)
     return links, ref
 
 
@@ -91,7 +90,7 @@ def categorise_links(links):
                 pdf_links.append(link)
             elif result_type == "jina":
                 jina_links.append("https://r.jina.ai/" + link)
-    print(jina_links, pdf_links)
+    ic(jina_links, pdf_links)
     return jina_links, pdf_links
 
 
@@ -120,7 +119,7 @@ def jina_text_read(jina_links):
             document = future.result()
             if document is not None:  # Add only successfully fetched documents
                 jina_text.append(document)
-    print(jina_text)
+    ic(jina_text)
     return jina_text
 
 
@@ -175,7 +174,7 @@ def pdf_text_read(pdf_links):
             if document is not None:  # Only add successful results
                 pdf_text.append(document)
 
-    print(pdf_text)
+    ic(pdf_text)
     return pdf_text
 
 
