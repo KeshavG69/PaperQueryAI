@@ -111,7 +111,7 @@ def jina_text_read(jina_links):
     """Fetch text content from multiple links in parallel and return as Documents."""
     jina_text = []
 
-    with ThreadPoolExecutor(max_workers=10) as executor:  # Adjust max_workers as needed
+    with ThreadPoolExecutor(max_workers=5) as executor:  # Adjust max_workers as needed
         futures = {
             executor.submit(fetch_link_content, link): link for link in jina_links
         }
