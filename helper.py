@@ -6,7 +6,7 @@ from io import BytesIO
 import pdfplumber
 from icecream import ic 
 from dotenv import load_dotenv
-
+from templates import greet_template,greeting_template
 from langchain_core.prompts import ChatPromptTemplate
 
 import streamlit as st
@@ -16,7 +16,7 @@ from langchain_core.documents import Document
 from langchain_google_genai import ChatGoogleGenerativeAI
 from templates import template
 from serpapi import GoogleSearch
-
+from pydantic import BaseModel, Field
 
 load_dotenv()
 ic.disable()
@@ -202,6 +202,40 @@ def pdf_text_read(pdf_links):
 #     return answer
 
 
+
+class Greeting(BaseModel):
+  """ Binary Score for whether the question is a greeting or not """
+  binary_score:str=Field(
+      ...,
+      description='The question is a greeting  "yes" or "no"'
+  )
+
+greet_structured_llm=llm.with_structured_output(Greeting)
+
+greet_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", greet_template),
+        ("human", "User Query: {user_query} "),
+    ]
+)
+
+greet_chain=greet_prompt | greet_structured_llm
+
+
+
+greeting_template=ChatPromptTemplate.from_template(greeting_template)
+greeting_chain=greeting_template | llm | StrOutputParser()
+
+
+def llm_respond (query):
+    for chunk in greeting_chain.stream(query):
+        yield chunk
+
+
+
+
+
+
 def ask(query):
     links, ref = get_research_papers(query)
     jina_links, pdf_links = categorise_links(links)
@@ -212,6 +246,9 @@ def ask(query):
         
     return ref,jina_text, pdf_text
 
+
+   
+   
 def llm_call(query, jina_text, pdf_text):
     prompt = ChatPromptTemplate.from_template(template)
     answer_chain = prompt | llm | StrOutputParser()
