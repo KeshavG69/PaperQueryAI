@@ -39,7 +39,6 @@ exceptiongroup==1.2.2
 executing==2.1.0
 filelock==3.16.1
 filetype==1.2.0
-fitz==0.0.1.dev2
 flatbuffers==24.3.25
 fonttools==4.55.3
 frozenlist==1.5.0
