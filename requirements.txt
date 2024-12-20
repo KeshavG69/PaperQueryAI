@@ -39,6 +39,7 @@ exceptiongroup==1.2.2
 executing==2.1.0
 filelock==3.16.1
 filetype==1.2.0
+fitz==0.0.1.dev2
 flatbuffers==24.3.25
 fonttools==4.55.3
 frozenlist==1.5.0
@@ -144,7 +145,7 @@ pydantic_core==2.23.4
 pydeck==0.9.1
 pydot==3.0.3
 Pygments==2.18.0
-pymupdf
+PyMuPDF==1.25.1
 pyparsing==3.2.0
 pypdf==5.1.0
 pypdfium2==4.30.0
