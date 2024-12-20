@@ -5,9 +5,10 @@ from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 
 
+
 # ic.enable()
 ic.disable()
-
+# timestamp = datetime.datetime.now().isoformat() 
 
 st.set_page_config(page_title="PaperQueryAI", page_icon="🤖", layout="wide")
 
@@ -37,9 +38,8 @@ for message in st.session_state.messages:
 
 # User input
 if prompt := st.chat_input("Ask your question based on research papers:"):
-    data=pd.DataFrame([{'User Question':prompt }])
-    updated_df=pd.concat([existing_data,data],ignore_index=True)
-    conn.update(data=updated_df,worksheet="PaperQueryAI")
+
+
     # Append user input to session state and display it
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -64,8 +64,9 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
             else:
                 # print something to know that it is a research query
                 ic("This is a research query")
+
                 ref, jina_text, pdf_text = ask(prompt)
-    
+
 
                 response = st.write_stream(llm_call(prompt, jina_text, pdf_text))
 
@@ -80,7 +81,13 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
                     {"role": "assistant", "content": response, "references": ref}
                 )
 
-    updated_df.iloc[-1, updated_df.columns.get_loc("LLM Response")] = response
-    conn.update(data=updated_df, worksheet="PaperQueryAI")
+    data = pd.DataFrame([{
+
+    "User Question": prompt,
+    "LLM Response": response  # Placeholder for the response
+}])
+    updated_data = pd.concat([existing_data, data])
+    conn.update(data=updated_data,worksheet="PaperQueryAI")
+    
 
 

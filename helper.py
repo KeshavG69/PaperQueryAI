@@ -1,6 +1,9 @@
 import requests
 from langchain_core.output_parsers import StrOutputParser
 import os
+import fitz
+import time
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 import pdfplumber
@@ -138,25 +141,19 @@ def jina_text_read(jina_links):
 
 
 def fetch_pdf_text(link):
-    """Fetch a PDF from a URL, extract its text, and wrap it in a Document."""
     try:
-        response = requests.get(link, timeout=10)  # Fetch PDF with a timeout
+        response = requests.get(link, timeout=10)
         if response.status_code != 200:
-
             return None
 
         pdf_file = BytesIO(response.content)
         text = ""
-        with pdfplumber.open(pdf_file) as pdf:
-            for page in pdf.pages:
-                extracted_text = page.extract_text()
-                if extracted_text:  # Avoid None results
-                    text += extracted_text
+        with fitz.open(stream=pdf_file, filetype="pdf") as pdf:
+            for page in pdf:
+                text += page.get_text()  # Extract text using PyMuPDF
 
         return Document(page_content=text, metadata={"source": link})
     except Exception as e:
-        pass
-
         return None  # Gracefully skip any problematic links
 
 
