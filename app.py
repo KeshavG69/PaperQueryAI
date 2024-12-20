@@ -1,13 +1,21 @@
 import streamlit as st
 from helper import ask, llm_call, greet_chain, llm_respond
 from icecream import ic 
+from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 
 
-# ic.disable()
+# ic.enable()
+ic.disable()
+
 
 st.set_page_config(page_title="PaperQueryAI", page_icon="🤖", layout="wide")
 
 st.title("PaperQueryAI: Chatbot Based On Research Papers")
+
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+existing_data=conn.read(worksheet="PaperQueryAI",ttl=5)
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
@@ -42,7 +50,7 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
 
             if greet_score.binary_score == "yes":
                 # print something to know that it is a greeting query
-                print("This is a greeting query")
+                ic("This is a greeting query")
                 response = st.write_stream(llm_respond(prompt))
 
                 st.session_state.messages.append(
@@ -53,8 +61,9 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
                 )
             else:
                 # print something to know that it is a research query
-                print("This is a research query")
+                ic("This is a research query")
                 ref, jina_text, pdf_text = ask(prompt)
+    
 
                 response = st.write_stream(llm_call(prompt, jina_text, pdf_text))
 
@@ -68,3 +77,10 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
                 st.session_state.messages.append(
                     {"role": "assistant", "content": response, "references": ref}
                 )
+
+    data=pd.DataFrame([{'User Question':prompt,
+                    "LLM Response":response }])
+    updated_df=pd.concat([existing_data,data],ignore_index=True)
+    conn.update(data=updated_df,worksheet="PaperQueryAI")
+
+
