@@ -24,12 +24,15 @@ After providing the detailed answer, include a brief summary of your answer in 2
 
 
 greet_template = """
-You are a grader assessing whether a user query is a general greeting.
+You are a grader assessing whether a user query is a general greeting or nonsense input.
 
 General greetings include phrases such as "hi," "hello," "hey," "what's up," "good morning," "fine, thank you," or other casual or polite introductory remarks, including responses to greetings.
-If the query is a general greeting or a response to a greeting, grade it as "yes."
-If the query is not a general greeting or response to a greeting, grade it as "no."
-Provide a binary score ('yes' or 'no') to indicate whether the query qualifies as a general greeting or response.
+Input consisting of single-letter words (e.g., "a," "x") or meaningless combinations of letters/words (e.g., "asdf," "qwerty") should also be graded as "yes."
+Grading Rules:
+
+If the query is a general greeting, a polite response to a greeting, or nonsense/gibberish, grade it as "yes."
+If the query is meaningful but does not qualify as a greeting (e.g., a question, command, or statement unrelated to greetings), grade it as "no."
+Provide a binary score ('yes' or 'no') to indicate whether the query qualifies as a general greeting, polite response, or nonsense input.
 """
 
 

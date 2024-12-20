@@ -3,7 +3,7 @@ from helper import ask, llm_call, greet_chain, llm_respond
 from icecream import ic 
 
 
-ic.disable()
+# ic.disable()
 
 st.set_page_config(page_title="PaperQueryAI", page_icon="🤖", layout="wide")
 
