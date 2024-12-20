@@ -1,12 +1,12 @@
 import requests
 from langchain_core.output_parsers import StrOutputParser
-import os
 import fitz
-import time
+import aiohttp
+import asyncio
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
-import pdfplumber
+
 from icecream import ic 
 from dotenv import load_dotenv
 from templates import greet_template,greeting_template
@@ -140,39 +140,64 @@ def jina_text_read(jina_links):
 
 
 
-def fetch_pdf_text(link):
-    try:
-        response = requests.get(link, timeout=10)
-        if response.status_code != 200:
-            return None
+# def fetch_pdf_text(link):
+#     try:
+#         response = requests.get(link, timeout=10)
+#         if response.status_code != 200:
+#             return None
 
-        pdf_file = BytesIO(response.content)
-        text = ""
-        with fitz.open(stream=pdf_file, filetype="pdf") as pdf:
-            for page in pdf:
-                text += page.get_text()  # Extract text using PyMuPDF
+#         pdf_file = BytesIO(response.content)
+#         text = ""
+#         with fitz.open(stream=pdf_file, filetype="pdf") as pdf:
+#             for page in pdf:
+#                 text += page.get_text()  # Extract text using PyMuPDF
 
-        return Document(page_content=text, metadata={"source": link})
-    except Exception as e:
-        return None  # Gracefully skip any problematic links
+#         return Document(page_content=text, metadata={"source": link})
+#     except Exception as e:
+#         return None  # Gracefully skip any problematic links
 
 
-def pdf_text_read(pdf_links):
-    """Fetch and extract text from multiple PDFs concurrently."""
-    pdf_text = []
+# def pdf_text_read(pdf_links):
+#     """Fetch and extract text from multiple PDFs concurrently."""
+#     pdf_text = []
 
-    with ThreadPoolExecutor(
-        max_workers=10
-    ) as executor:  # Adjust max_workers for concurrency
-        futures = {executor.submit(fetch_pdf_text, link): link for link in pdf_links}
+#     with ThreadPoolExecutor(
+#         max_workers=10
+#     ) as executor:  # Adjust max_workers for concurrency
+#         futures = {executor.submit(fetch_pdf_text, link): link for link in pdf_links}
 
-        for future in as_completed(futures):
-            document = future.result()
-            if document is not None:  # Only add successful results
-                pdf_text.append(document)
+#         for future in as_completed(futures):
+#             document = future.result()
+#             if document is not None:  # Only add successful results
+#                 pdf_text.append(document)
 
-    ic(pdf_text)
-    return pdf_text
+#     ic(pdf_text)
+#     return pdf_text
+
+
+async def extract_text_from_pdf_url(link, session):
+    
+    async with session.get(link) as response:
+        response.raise_for_status()  
+        pdf_content = await response.read()
+
+    
+    doc = fitz.open(stream=pdf_content, filetype="pdf")
+    text = ""
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)  
+        text += page.get_text()  
+    return text
+
+
+async def pdf_text_read(pdf_links):
+    async with aiohttp.ClientSession() as session:
+        tasks = [extract_text_from_pdf_url(link, session) for link in pdf_links]
+        texts = await asyncio.gather(*tasks)
+        return texts
+
+
+
 
 
 # def pdf_text_read(pdf_links):
@@ -238,10 +263,10 @@ def ask(query):
     jina_links, pdf_links = categorise_links(links)
 
     jina_text = jina_text_read(jina_links)
-    pdf_text = pdf_text_read(pdf_links)
+    # pdf_text = await pdf_text_read(pdf_links)
 
         
-    return ref,jina_text, pdf_text
+    return ref,jina_text,pdf_links 
 
 
    

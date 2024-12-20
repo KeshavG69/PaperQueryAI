@@ -1,14 +1,15 @@
 import streamlit as st
-from helper import ask, llm_call, greet_chain, llm_respond
+from helper import ask , llm_call,pdf_text_read,llm_respond,greet_chain
 from icecream import ic 
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
+import asyncio
 
 
 
-# ic.enable()
-ic.disable()
-# timestamp = datetime.datetime.now().isoformat() 
+ic.enable()
+# ic.disable()
+
 
 st.set_page_config(page_title="PaperQueryAI", page_icon="🤖", layout="wide")
 
@@ -65,7 +66,9 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
                 # print something to know that it is a research query
                 ic("This is a research query")
 
-                ref, jina_text, pdf_text = ask(prompt)
+                ref, jina_text,pdf_links  = ask(prompt)
+                pdf_text = asyncio.run(pdf_text_read(pdf_links))
+                print(pdf_text)
 
 
                 response = st.write_stream(llm_call(prompt, jina_text, pdf_text))
