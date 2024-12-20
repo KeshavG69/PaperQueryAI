@@ -7,8 +7,8 @@ import asyncio
 
 
 
-ic.enable()
-# ic.disable()
+# ic.enable()
+ic.disable()
 
 
 st.set_page_config(page_title="PaperQueryAI", page_icon="🤖", layout="wide")
