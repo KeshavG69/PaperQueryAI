@@ -37,7 +37,9 @@ for message in st.session_state.messages:
 
 # User input
 if prompt := st.chat_input("Ask your question based on research papers:"):
-
+    data=pd.DataFrame([{'User Question':prompt }])
+    updated_df=pd.concat([existing_data,data],ignore_index=True)
+    conn.update(data=updated_df,worksheet="PaperQueryAI")
     # Append user input to session state and display it
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -78,9 +80,7 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
                     {"role": "assistant", "content": response, "references": ref}
                 )
 
-    data=pd.DataFrame([{'User Question':prompt,
-                    "LLM Response":response }])
-    updated_df=pd.concat([existing_data,data],ignore_index=True)
-    conn.update(data=updated_df,worksheet="PaperQueryAI")
+    updated_df.iloc[-1, updated_df.columns.get_loc("LLM Response")] = response
+    conn.update(data=updated_df, worksheet="PaperQueryAI")
 
 
