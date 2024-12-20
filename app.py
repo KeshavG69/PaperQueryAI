@@ -42,7 +42,7 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
 
             if greet_score.binary_score == "yes":
                 # print something to know that it is a greeting query
-                ic("This is a greeting query")
+                print("This is a greeting query")
                 response = st.write_stream(llm_respond(prompt))
 
                 st.session_state.messages.append(
@@ -53,7 +53,7 @@ if prompt := st.chat_input("Ask your question based on research papers:"):
                 )
             else:
                 # print something to know that it is a research query
-                ic("This is a research query")
+                print("This is a research query")
                 ref, jina_text, pdf_text = ask(prompt)
 
                 response = st.write_stream(llm_call(prompt, jina_text, pdf_text))
